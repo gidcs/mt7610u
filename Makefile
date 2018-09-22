@@ -193,6 +193,8 @@ MODULE = mt7610u
 
 PWD = $(shell pwd)
 
+LINUX_SRC_MODULE = /lib/modules/$(shell uname -r)/kernel/drivers/net/wireless/mediatek/mt7610u/
+
 RTMP_SRC_DIR = $(PWD)/RT$(MODULE)
 
 #PLATFORM: Target platform
@@ -355,7 +357,7 @@ ifeq ($(PLATFORM),PC)
 KSRC = /lib/modules/$(shell uname -r)/build
 CROSS_COMPILE =
 EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
-SUBARCH := $(shell uname -m | sed -e s/i.86/i386/)
+SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/arm.*/arm/)
 ARCH ?= $(SUBARCH)
 endif
 
@@ -386,6 +388,11 @@ clean:
 
 installfw:
 	cp -n firmware/* /lib/firmware
+
+install:
+	install -d $(LINUX_SRC_MODULE)
+	install -m 644 -c $(addsuffix .ko,$(MOD_NAME)) $(LINUX_SRC_MODULE)
+	depmod -a ${shell uname -r}
 
 help:
 	@echo "options :"
